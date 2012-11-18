@@ -2,6 +2,7 @@
 
 require 'net/http'
 require 'uri'
+require "addressable/uri"
 
 class VikingRequest
   @apiKey
@@ -30,7 +31,7 @@ class VikingRequest
      puts @url
      puts @verb
      puts @requestBody
-     execute()
+     buildPostBody(@requestBody)
   end
   
   def flush()
@@ -43,7 +44,6 @@ class VikingRequest
      	    puts "GETTING"
      	    executeGet()
      	  when "POST"
-     	    puts "POSTING"
      	    executePost()
      	  when "DELETE"
      	    puts "DELETING"
@@ -96,7 +96,17 @@ class VikingRequest
   def ipvikingShowReasons()
   end
 
-  def buildPostBody(data = null)
+  def buildPostBody(data = nil)
+  	data = (data !== nil) ? data : @requestBody;
+		
+	if (!data.is_a?(Hash)) then
+		#throw new InvalidArgumentException('Invalid data input for postBody.  Hash expected');
+	end
+	
+	uri = Addresssable::URI.new
+	uri.query_values = data
+	data = URI::HTTP.build({:host => "www.yahoo.com", :query => uri.query})
+	@requestBody = data;
   end
   
   protected
@@ -105,6 +115,13 @@ class VikingRequest
 
   protected
   def executePost(ch)
+    if (@requestBody.is_a?(Hash)) then
+		buildPostBody()
+	end
+	
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $this->requestBody);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	$this->doExecute(ch);
   end
 
   protected
