@@ -97,16 +97,11 @@ class VikingRequest
   end
 
   def buildPostBody(data = nil)
-  	data = (data !== nil) ? data : @requestBody;
-		
-	if (!data.is_a?(Hash)) then
-		#throw new InvalidArgumentException('Invalid data input for postBody.  Hash expected');
-	end
-	
+	raise ArgumentError, 'data is not a hash' unless data.is_a?(Hash)
 	uri = Addresssable::URI.new
 	uri.query_values = data
-	data = URI::HTTP.build({:host => "www.yahoo.com", :query => uri.query})
-	@requestBody = data;
+	request = URI::HTTP.build({:host => "www.yahoo.com", :query => uri.query})
+	@requestBody = request;
   end
   
   protected
